@@ -25,6 +25,7 @@ ALLOWED_TYPES = {
     "text/plain",
     "application/pdf",
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "application/msword",
 }
 MAX_FILE_BYTES = 10 * 1024 * 1024  # 10 MB
 
@@ -35,7 +36,7 @@ async def parse_file(file: UploadFile = File(...)):
     data = await file.read()
     if len(data) > MAX_FILE_BYTES:
         raise HTTPException(413, "File exceeds 10 MB limit")
-    with tempfile.NamedTemporaryFile(delete=False, suffix=file.filename) as tmp:
+    with tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(file.filename)[1]) as tmp:
         tmp.write(data)
         tmp_path = tmp.name
     try:
