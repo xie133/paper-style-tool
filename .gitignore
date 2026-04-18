@@ -15,3 +15,6 @@ frontend/dist/
 # OS
 .DS_Store
 Thumbs.db
+
+# Generated lock files
+frontend/package-lock.json
