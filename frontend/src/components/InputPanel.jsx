@@ -20,7 +20,7 @@ export default function InputPanel({ text, onTextChange, mode, onModeChange, ins
     }
   }
 
-  const canProcess = text.trim().length > 0 && mode !== "";
+  const canProcess = isProcessing || (text.trim().length > 0 && mode !== "");
 
   return (
     <div className="flex flex-col gap-4 p-4 h-full">
