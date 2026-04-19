@@ -11,10 +11,13 @@ def build_messages(
     style_description: str,
     instruction: str,
 ) -> dict:
+    if mode not in ("restyle", "shorten", "expand"):
+        raise ValueError(f"Unknown mode: {mode!r}")
     lang = detect_language(text)
+    truncation_marker = "\n[样本已截断]" if lang == "zh" else "\n[Samples truncated]"
     combined_samples = "\n\n---\n\n".join(style_samples)
     if len(combined_samples) > MAX_SAMPLE_CHARS:
-        combined_samples = combined_samples[:MAX_SAMPLE_CHARS] + "\n[样本已截断]"
+        combined_samples = combined_samples[:MAX_SAMPLE_CHARS] + truncation_marker
 
     if lang == "zh":
         system = _build_system_zh(mode, combined_samples, style_description, instruction)
