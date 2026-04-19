@@ -5,9 +5,13 @@ export default function ResultPanel({ result, isProcessing, error }) {
   const [copied, setCopied] = useState(false);
 
   async function handleCopy() {
-    await navigator.clipboard.writeText(result);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
+    try {
+      await navigator.clipboard.writeText(result);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch (err) {
+      alert("复制失败，请手动选择文本复制");
+    }
   }
 
   async function handleDownload(format) {

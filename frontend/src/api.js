@@ -48,7 +48,9 @@ export function streamProcess({ text, mode, styleSamples, styleDescription, inst
           const parsed = JSON.parse(payload);
           if (parsed.error) { onError(parsed.error); return; }
           if (parsed.text) onChunk(parsed.text);
-        } catch (_) {}
+        } catch (e) {
+          console.warn("SSE parse error:", line, e);
+        }
       }
     }
     onDone();
@@ -71,6 +73,8 @@ export async function downloadFile(text, format) {
   const a = document.createElement("a");
   a.href = url;
   a.download = `result.${format}`;
+  document.body.appendChild(a);
   a.click();
+  document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }

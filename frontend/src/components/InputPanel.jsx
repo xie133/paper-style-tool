@@ -29,7 +29,7 @@ export default function InputPanel({ text, onTextChange, mode, onModeChange, ins
       <div
         className={`relative flex-1 border-2 rounded transition ${dragOver ? "border-blue-400 bg-blue-50" : "border-gray-300"}`}
         onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
-        onDragLeave={() => setDragOver(false)}
+        onDragLeave={(e) => { if (!e.currentTarget.contains(e.relatedTarget)) setDragOver(false); }}
         onDrop={(e) => { e.preventDefault(); setDragOver(false); const f = e.dataTransfer.files[0]; if (f) handleFileLoad(f); }}
       >
         <textarea

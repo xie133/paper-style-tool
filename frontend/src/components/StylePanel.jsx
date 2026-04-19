@@ -9,7 +9,7 @@ export default function StylePanel({ samples, onSamplesChange, description, onDe
     if (!file) return;
     try {
       const text = await parseFile(file);
-      onSamplesChange([...samples, { name: file.name, text }]);
+      onSamplesChange([...samples, { id: crypto.randomUUID(), name: file.name, text }]);
     } catch (err) {
       alert(`样本解析失败：${err.message}`);
     }
@@ -31,10 +31,10 @@ export default function StylePanel({ samples, onSamplesChange, description, onDe
         <input ref={fileRef} type="file" accept=".txt,.pdf,.docx" className="hidden" onChange={handleSampleUpload} />
         {samples.length > 0 && (
           <div className="mt-2 flex flex-wrap gap-2">
-            {samples.map((s, i) => (
-              <span key={i} className="flex items-center gap-1 bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full">
+            {samples.map((s) => (
+              <span key={s.id} className="flex items-center gap-1 bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full">
                 {s.name}
-                <button onClick={() => onSamplesChange(samples.filter((_, j) => j !== i))} className="ml-1 text-blue-400 hover:text-red-500">×</button>
+                <button onClick={() => onSamplesChange(samples.filter((s2) => s2.id !== s.id))} className="ml-1 text-blue-400 hover:text-red-500">×</button>
               </span>
             ))}
           </div>
