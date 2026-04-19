@@ -3,7 +3,14 @@ import anthropic
 
 MAX_TEXT_CHARS = 180000  # ~60k tokens
 
-client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
+_api_key = os.environ.get("ANTHROPIC_API_KEY")
+if not _api_key:
+    raise RuntimeError(
+        "ANTHROPIC_API_KEY environment variable is not set. "
+        "Please edit .env file in the project root and set your API key."
+    )
+
+client = anthropic.Anthropic(api_key=_api_key)
 
 def stream_completion(system: str, user: str):
     """Yields text chunks from Claude streaming response using raw SSE event iteration."""

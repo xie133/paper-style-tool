@@ -1,20 +1,5 @@
-# Python
+.env
 __pycache__/
 *.pyc
 *.pyo
-.venv/
-venv/
-
-# Node
-frontend/node_modules/
-frontend/dist/
-
-# Environment
-.env
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Generated lock files
-frontend/package-lock.json
+.pytest_cache/
