@@ -1,9 +1,14 @@
 import os
 import tempfile
+import json
 from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 from dotenv import load_dotenv
 from file_parser import extract_text
+from prompt_builder import build_messages
+from claude_client import stream_completion
 
 load_dotenv()
 
@@ -46,3 +51,41 @@ async def parse_file(file: UploadFile = File(...)):
     finally:
         os.unlink(tmp_path)
     return {"text": text}
+
+
+class ProcessRequest(BaseModel):
+    text: str
+    mode: str  # "restyle" | "shorten" | "expand"
+    style_samples: list[str] = []
+    style_description: str = ""
+    instruction: str = ""
+
+@app.post("/api/process")
+async def process_paper(req: ProcessRequest):
+    if req.mode not in ("restyle", "shorten", "expand"):
+        raise HTTPException(400, "mode must be restyle, shorten, or expand")
+    if not req.text.strip():
+        raise HTTPException(400, "text is required")
+
+    try:
+        msgs = build_messages(
+            text=req.text,
+            mode=req.mode,
+            style_samples=req.style_samples,
+            style_description=req.style_description,
+            instruction=req.instruction,
+        )
+    except Exception as e:
+        raise HTTPException(400, str(e))
+
+    def event_stream():
+        try:
+            for chunk in stream_completion(msgs["system"], msgs["user"]):
+                yield f"data: {json.dumps({'text': chunk})}\n\n"
+        except ValueError as e:
+            yield f"data: {json.dumps({'error': str(e)})}\n\n"
+        except Exception as e:
+            yield f"data: {json.dumps({'error': 'Claude API error: ' + str(e)})}\n\n"
+        yield "data: [DONE]\n\n"
+
+    return StreamingResponse(event_stream(), media_type="text/event-stream")
