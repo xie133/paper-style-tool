@@ -88,4 +88,8 @@ async def process_paper(req: ProcessRequest):
             yield f"data: {json.dumps({'error': 'Claude API error: ' + str(e)})}\n\n"
         yield "data: [DONE]\n\n"
 
-    return StreamingResponse(event_stream(), media_type="text/event-stream")
+    return StreamingResponse(
+        event_stream(),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+    )
