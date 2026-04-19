@@ -1,7 +1,7 @@
 import os
 import tempfile
 import json
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import FastAPI, UploadFile, File, HTTPException, Response
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 from file_parser import extract_text
 from prompt_builder import build_messages
 from claude_client import stream_completion
+from downloader import generate_docx_bytes, generate_pdf_bytes
 
 load_dotenv()
 
@@ -93,3 +94,27 @@ async def process_paper(req: ProcessRequest):
         media_type="text/event-stream",
         headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
     )
+
+
+class DownloadRequest(BaseModel):
+    text: str
+    format: str  # "docx" | "pdf"
+
+@app.post("/api/download")
+def download_file(req: DownloadRequest):
+    if req.format == "docx":
+        data = generate_docx_bytes(req.text)
+        return Response(
+            content=data,
+            media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            headers={"Content-Disposition": "attachment; filename=result.docx"},
+        )
+    elif req.format == "pdf":
+        data = generate_pdf_bytes(req.text)
+        return Response(
+            content=data,
+            media_type="application/pdf",
+            headers={"Content-Disposition": "attachment; filename=result.pdf"},
+        )
+    else:
+        raise HTTPException(400, "format must be docx or pdf")
