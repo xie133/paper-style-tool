@@ -102,6 +102,9 @@ class DownloadRequest(BaseModel):
 
 @app.post("/api/download")
 def download_file(req: DownloadRequest):
+    MAX_DOWNLOAD_CHARS = 500_000
+    if len(req.text) > MAX_DOWNLOAD_CHARS:
+        raise HTTPException(400, "text too large for download")
     if req.format == "docx":
         data = generate_docx_bytes(req.text)
         return Response(
