@@ -1,4 +1,4 @@
-const BASE = "http://localhost:8000";
+const BASE = "";
 
 export async function parseFile(file) {
   const form = new FormData();

@@ -4,6 +4,8 @@ import json
 from fastapi import FastAPI, UploadFile, File, HTTPException, Response
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from dotenv import load_dotenv
 from file_parser import extract_text
@@ -17,7 +19,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:5173"],
+    allow_origins=["*"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -25,6 +27,15 @@ app.add_middleware(
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+# 托管前端静态文件
+_frontend_dist = os.path.join(os.path.dirname(__file__), "..", "frontend", "dist")
+if os.path.exists(_frontend_dist):
+    app.mount("/assets", StaticFiles(directory=os.path.join(_frontend_dist, "assets")), name="assets")
+
+    @app.get("/")
+    def serve_index():
+        return FileResponse(os.path.join(_frontend_dist, "index.html"))
 
 
 ALLOWED_TYPES = {
